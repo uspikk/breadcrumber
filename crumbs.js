@@ -1,9 +1,12 @@
 let account = "nrg";
 let wif = "";
 
-let shortpercent = 5
-let precentageoftokensperinterval = 0.1
-let interval = 1
+/*above use example
+/*below edit number only*/
+
+let shortpercent = 5 //precent to short
+let precentageoftokensperinterval = 0.1 //how many crumbs per interval
+let interval = 1 //time in minutes in between cycles
 
 ////////////////////////////////EDIT ABOVE
 
