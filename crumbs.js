@@ -1,7 +1,7 @@
 let account = "nrg";
 let wif = "";
 
-/*above use example
+/*above use example*/
 /*below edit number only*/
 
 let shortpercent = 5 //precent to short
