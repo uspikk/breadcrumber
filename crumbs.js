@@ -256,6 +256,7 @@ function sellback(json, book){
   let sellprice = JSON.parse(txarray[0].contractPayload.price)*longpercent/100
   sellprice = sellprice + JSON.parse(txarray[0].contractPayload.price)
   sellprice = sellprice.toFixed(8).toString();
+
   let txload = {
     "contractName" : "market",
     "contractAction" : "sell",
@@ -267,8 +268,6 @@ function sellback(json, book){
     }
   txarray.push(txload)
    savestate(txarray, 1)
- txarray[0].contractPayload.quantity = JSON.stringify(txarray[0].contractPayload.quantity)
- txarray[1].contractPayload.quantity = JSON.stringify(txarray[1].contractPayload.quantity)
  let transactionarray = []
  for(var i=0;i<book.length;i++){
   if(book[i].account === account){
