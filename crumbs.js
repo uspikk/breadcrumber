@@ -203,7 +203,6 @@ if(iterator === 1){
     data = JSON.parse(data)
     data.trades++
     data.steem = data.steem+winrar
-    data.steem = (data.breadcrumbs).toFixed(8)*1
     fs.writeFile(__dirname + '/log.json', JSON.stringify(data), function (err) {
      if (err) throw err;
     })
