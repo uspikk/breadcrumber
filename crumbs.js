@@ -6,11 +6,11 @@ let renewallorderinterval = 1440//renew interval
 let startwithrenew = false //starts the script by renewing orders
 
 let shortpercent = 5
-let precentageoftokensperinterval = 0.01
+let precentageoftokensperinterval = 0.1
 
 
 let longpercent = 5
-let longprecentageoftokensperinterval = 0.01
+let longprecentageoftokensperinterval = 0.1
 
 
 let request = require("graphql-request").request
@@ -195,15 +195,14 @@ fs.readFile(__dirname + '/log.json', "utf8", (err, data) => {
 if(iterator === 1){
   let arr0steem = JSON.parse(arr[0].contractPayload.quantity)*JSON.parse(arr[0].contractPayload.price)
   let arr1steem = JSON.parse(arr[1].contractPayload.quantity)*JSON.parse(arr[1].contractPayload.price)
-  let profit = arr1steem -  arr0steem
-  console.log(arr0steem)
-  console.log(arr1steem)
+  let winrar = arr1steem -  arr0steem
+  winrar = winrar*1
   fs.readFile(__dirname + '/log.json', "utf8", (err, data) => {
   if (err) throw err;
   if (data){
     data = JSON.parse(data)
     data.trades++
-    data.steem = data.steem+profit
+    data.steem = data.steem+winrar
     data.steem = (data.breadcrumbs).toFixed(8)*1
     fs.writeFile(__dirname + '/log.json', JSON.stringify(data), function (err) {
      if (err) throw err;
