@@ -1,8 +1,8 @@
 let account = "nrg";
 let wif = "";
 
-let interval = 0.3//interval in between cycles
-let renewallorderinterval = 1000//renew interval
+let interval = 1//interval in between cycles
+let renewallorderinterval = 1440//renew interval
 let startwithrenew = false //starts the script by renewing orders
 
 let shortpercent = 5
@@ -10,7 +10,7 @@ let precentageoftokensperinterval = 0.01
 
 
 let longpercent = 5
-let longprecentageoftokensperinterval = 0.1
+let longprecentageoftokensperinterval = 0.01
 
 
 let request = require("graphql-request").request
@@ -28,7 +28,7 @@ function start(){
 };
 
 function getbook(tokenBalance){
- let query = `{buyBook(symbol:"HBBC"){txId, quantity, price, expiration, account}}`
+ let query = `{buyBook(symbol:"HBBC", limit:1000){txId, quantity, price, expiration, account}}`
  request('https://graphql.steem.services/', query).then(data =>{
   let arr1 = Array.from(data.buyBook);
   arr1 = arr1.sort(function(a,b){return b.price - a.price});
@@ -83,7 +83,7 @@ function buyback(json, book){
        }
     }
  txarray.push(txload)
- savestate(txarray)
+ savestate(txarray, 0)
  txarray[0].contractPayload.quantity = JSON.stringify(txarray[0].contractPayload.quantity)
  txarray[1].contractPayload.quantity = JSON.stringify(txarray[1].contractPayload.quantity)
  let transactionarray = []
@@ -173,7 +173,8 @@ function breadcast(txarray){
 start();
 }
 
-function savestate(arr){
+function savestate(arr, iterator){
+if(iterator === 0){
 let newarr = arr
 newarr[0].contractPayload.quantity = JSON.parse(arr[0].contractPayload.quantity)
 newarr[1].contractPayload.quantity = JSON.parse(arr[1].contractPayload.quantity)
@@ -190,6 +191,26 @@ fs.readFile(__dirname + '/log.json', "utf8", (err, data) => {
     })
   }
 })
+}
+if(iterator === 1){
+  let arr0steem = JSON.parse(arr[0].contractPayload.quantity)*JSON.parse(arr[0].contractPayload.price)
+  let arr1steem = JSON.parse(arr[1].contractPayload.quantity)*JSON.parse(arr[1].contractPayload.price)
+  let profit = arr1steem -  arr0steem
+  console.log(arr0steem)
+  console.log(arr1steem)
+  fs.readFile(__dirname + '/log.json', "utf8", (err, data) => {
+  if (err) throw err;
+  if (data){
+    data = JSON.parse(data)
+    data.trades++
+    data.steem = data.steem+profit
+    data.steem = (data.breadcrumbs).toFixed(8)*1
+    fs.writeFile(__dirname + '/log.json', JSON.stringify(data), function (err) {
+     if (err) throw err;
+    })
+  }
+})
+}
 }
 
 
@@ -245,7 +266,7 @@ function sellback(json, book){
        }
     }
   txarray.push(txload)
-   savestate(txarray)
+   savestate(txarray, 1)
  txarray[0].contractPayload.quantity = JSON.stringify(txarray[0].contractPayload.quantity)
  txarray[1].contractPayload.quantity = JSON.stringify(txarray[1].contractPayload.quantity)
  let transactionarray = []
