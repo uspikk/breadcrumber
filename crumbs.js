@@ -497,6 +497,7 @@ let renewcycle = 0;
 function lobby(cycle){
  if(renewcycle === renewallorderinterval){
   renew();
+  renewcycle = 0;
   return;
  }
   renewcycle++
