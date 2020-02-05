@@ -2,7 +2,7 @@ let account = "nrg";
 let wif = "";
 
 let interval = 1//interval in between cycles
-let renewallorderinterval = 1440//renew interval
+let renewallorderinterval = 3000//renew interval
 let startwithrenew = false //starts the script by renewing orders
 
 let shortpercent = 5
@@ -216,20 +216,36 @@ function longcycle(){
 function startlong(){
  let query = `{tokenBalance(symbol:"HBBC" account:"${account}"){account, symbol, balance}}`
  request('https://graphql.steem.services/', query).then(data =>{
-  longgetbook(data.tokenBalance);
+  longquerybook(data.tokenBalance);
  })
 }
 
 function longgetbook(tokenBalance){
- let query = `{sellBook(symbol:"HBBC", limit:1000){txId, quantity, price, expiration, account}}`
- request('https://graphql.steem.services/', query).then(data =>{
-  let arr1 = Array.from(data.sellBook);
+  let arr1 = Array.from(queryarray);
   arr1 = arr1.sort(function(a,b){return a.price - b.price});
   console.log("Buying from " + arr1[0].account)
   if(arr1[0].account===account){lobby(4);return;}
   buytokens(tokenBalance, arr1);
- });
 };
+
+let querynum = 0;
+let queryarray = [];
+
+function longquerybook(tokenBalance){
+ let query = `{sellBook(symbol:"HBBC", limit:1000, offset:${querynum}){txId, quantity, price, expiration, account}}`
+ request('https://graphql.steem.services/', query).then(data =>{
+  if(data.sellBook.length > 0){
+   for(var i=0;i<data.sellBook.length;i++){
+    queryarray.push(data.sellBook[i])
+   }
+   querynum = querynum + 1000
+   longquerybook(tokenBalance)
+  }
+  if(data.sellBook.length === 0){
+   longgetbook(tokenBalance)
+  }
+ });
+}
 
 function buytokens(tokenBalance, book){
  let overfill = book[0].quantity
@@ -359,9 +375,24 @@ function renew(){
 
  function renewshort(){
   console.log("renewing short")
-  let query = `{buyBook(symbol:"HBBC", limit:1000){txId, quantity, price, expiration, account}}`
+  getorderbook([], 0);
+  function getorderbook(book, offset){
+  let query = `{buyBook(symbol:"HBBC", limit:1000, offset:${offset}){txId, quantity, price, expiration, account}}`
   request('https://graphql.steem.services/', query).then(data =>{
-   let arr1 = Array.from(data.buyBook);
+   if(data.buyBook.length > 0){
+    for(var i=0;i<data.buyBook.length;i++){
+     book.push(data.buyBook[i]);
+    }
+    offset = offset + 1000;
+    getorderbook(book, offset);
+    return;}
+   if(data.buyBook.length === 0){
+    generatearray(book);
+   }
+  })
+  }
+  function generatearray(book){
+   let arr1 = Array.from(book);
    arr1 = arr1.sort(function(a,b){return b.price - a.price});
    let txarray = []
    for(var i=0;i<arr1.length;i++){
@@ -388,6 +419,7 @@ function renew(){
     }
     if(i === arr1.length - 1) txsorter(txarray)
    }
+  }
    function txsorter(alltxs){
     broadcast(alltxs.splice(0,10), alltxs)
    }
@@ -412,14 +444,29 @@ function renew(){
     if(result){setTimeout(txsorter, 6000, alltxs);console.log(result.operations[0][1]);return;}
   });
    }
-  })
  }
 
  function renewlong(){
   console.log("renewing long")
-  let query = `{sellBook(symbol:"HBBC", limit:1000){txId, quantity, price, expiration, account}}`
-  request('https://graphql.steem.services/', query).then(data =>{
-   let arr1 = Array.from(data.sellBook);
+  
+  function getbook(book, offset){
+   let query = `{sellBook(symbol:"HBBC", limit:1000, offset:${offset}){txId, quantity, price, expiration, account}}`
+   request('https://graphql.steem.services/', query).then(data =>{
+   if(data.sellBook.length > 0){
+    for(var i=0;i<data.sellBook.length;i++){
+     book.push(data.sellBook[i])
+    }
+    offset = offset + 1000
+    getbook(book, offset)
+   }
+   if(data.sellBook.length === 0){
+    generatearray(book)
+   }
+   })
+  }
+
+  function generatearray(book){
+   let arr1 = Array.from(book);
    arr1 = arr1.sort(function(a,b){return a.price - b.price});
    let txarray = []
    for(var i=0;i<arr1.length;i++){
@@ -446,6 +493,7 @@ function renew(){
     }
     if(i === arr1.length - 1) txsorter(txarray)
    }
+  }
    function txsorter(alltxs){
     broadcast(alltxs.splice(0, 10), alltxs)
    }
@@ -470,7 +518,7 @@ function renew(){
     if(result){setTimeout(txsorter, 6000, alltxs);console.log(result.operations[0][1]);return;}
   });
    }
-  })
+     getbook([], 0)
  }
 
  function renewoperator(cycle){
@@ -525,3 +573,4 @@ function lobby(cycle){
  }
 }
 lobby(0);
+
