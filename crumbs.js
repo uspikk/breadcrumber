@@ -137,7 +137,7 @@ function buyback(json, book){
           console.log("istrue")
           txarray[1].contractPayload.quantity = JSON.parse(txarray[1].contractPayload.quantity);
           txarray[txarray.length - 1].contractPayload.quantity = JSON.parse(txarray[txarray.length - 1].contractPayload.quantity);
-          txarray[txarray.length - 1].contractPayload.quantity = txarray[1].contractPayload.quantity + txarray[txarray.length-1].contractPayload.quantity
+          txarray[txarray.length - 1].contractPayload.quantity = (txarray[1].contractPayload.quantity + txarray[txarray.length-1].contractPayload.quantity).toFixed(3)
           txarray[txarray.length - 1].contractPayload.quantity = JSON.stringify(txarray[txarray.length - 1].contractPayload.quantity)
           txarray.splice(1, 1)
         }
@@ -333,7 +333,7 @@ function sellback(json, book){
           console.log("istrue")
           txarray[1].contractPayload.quantity = JSON.parse(txarray[1].contractPayload.quantity);
           txarray[txarray.length - 1].contractPayload.quantity = JSON.parse(txarray[txarray.length - 1].contractPayload.quantity);
-          txarray[txarray.length - 1].contractPayload.quantity = txarray[1].contractPayload.quantity + txarray[txarray.length-1].contractPayload.quantity
+          txarray[txarray.length - 1].contractPayload.quantity = (txarray[1].contractPayload.quantity + txarray[txarray.length-1].contractPayload.quantity).toFixed(3)
           txarray[txarray.length - 1].contractPayload.quantity = JSON.stringify(txarray[txarray.length - 1].contractPayload.quantity)
           txarray.splice(1, 1)
         }
